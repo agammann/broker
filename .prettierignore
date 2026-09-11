@@ -1,0 +1,8 @@
+pnpm-lock.yaml
+node_modules
+dist
+web-dist
+data
+.secrets
+test-results
+playwright-report

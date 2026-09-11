@@ -1,0 +1,55 @@
+{
+  "name": "broker",
+  "version": "0.1.0-rc.1",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.19.0 <25"
+  },
+  "packageManager": "pnpm@11.19.0",
+  "scripts": {
+    "build": "tsc -p tsconfig.server.json && vite build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm test:e2e",
+    "start": "node dist/server/main.js",
+    "dev": "tsx src/server/main.ts",
+    "gateway": "node dist/server/gateway.js",
+    "mcp": "node dist/mcp/bridge.js",
+    "client": "node dist/mcp/client.js",
+    "portal": "node dist/fixtures/portal-main.js",
+    "init": "node scripts/init.mjs"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/rate-limit": "^11.2.0",
+    "@fastify/static": "^10.1.3",
+    "@modelcontextprotocol/sdk": "1.30.0",
+    "fastify": "5.12.3",
+    "ipaddr.js": "^2.2.0",
+    "otplib": "13.5.0",
+    "playwright": "1.63.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "1.63.0",
+    "@tailwindcss/vite": "^4.2.1",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^6.0.0",
+    "eslint": "^10.10.0",
+    "prettier": "^3.9.6",
+    "tailwindcss": "^4.2.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.57.0",
+    "vite": "8.2.2",
+    "vitest": "^4.1.0"
+  }
+}

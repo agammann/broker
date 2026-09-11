@@ -1,0 +1,10 @@
+{
+  admin off
+  auto_https off
+}
+http://:4310 {
+  reverse_proxy trusted:4310
+}
+http://:4311 {
+  reverse_proxy gateway:4311
+}

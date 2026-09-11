@@ -1,0 +1,11 @@
+node_modules
+.git
+.secrets
+.env
+data
+dist
+web-dist
+test-results
+playwright-report
+*.backup
+*.log

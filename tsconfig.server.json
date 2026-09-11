@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "dist",
+    "rootDir": "src",
+    "sourceMap": false
+  },
+  "include": [
+    "src/server",
+    "src/core",
+    "src/adapters",
+    "src/fixtures",
+    "src/mcp",
+    "src/shared"
+  ]
+}

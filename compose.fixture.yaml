@@ -1,0 +1,21 @@
+services:
+  trusted:
+    environment:
+      BROKER_ENABLE_FIXTURE: "1"
+      BROKER_FIXTURE_ORIGIN: http://test-portal:4313
+  test-portal:
+    build: { context: ., target: runtime }
+    init: true
+    command: ["node", "dist/fixtures/portal-main.js"]
+    environment:
+      BROKER_BIND: 0.0.0.0
+      BROKER_FIXTURE_USERS_FILE: /run/secrets/fixture_users
+    secrets: [fixture_users]
+    networks: [control]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 256m
+    pids_limit: 64
+secrets:
+  fixture_users: { file: ./.secrets/fixture-users.json }
