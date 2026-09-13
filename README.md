@@ -2,6 +2,10 @@
 
 **Give your agents the access they need, with control you keep.**
 
+**[Visit the Broker website and interactive sample](https://broker-access.alx21.chatgpt.site/)**
+
+The public website introduces Broker and includes a browser simulation with fictional data. Private account vaults run in your own installation.
+
 Broker is a self-hosted, single-owner service for delegating narrow account operations to agents. An owner privately enrolls credentials and grants access. A trusted service checks permission, authenticates with password and TOTP, owns the browser session, and returns structured invoice records through MCP.
 
 **Status: early release candidate, 0.1.0-rc.1. The bundled test portal is implemented. No real business portal is claimed compatible.** The first usable release remains blocked on owner selection and authorized verification of a real integration. Passing tests does not constitute an independent security audit or establish production security.
