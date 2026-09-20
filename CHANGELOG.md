@@ -1,5 +1,12 @@
 # Release notes
 
+## Unreleased
+
+- Fix MCP gateway URLs with a trailing slash producing a route-not-found response. The regression exercises both URL forms through the actual MCP and browser workflow.
+- Make tests portable to a fresh checkout by using OS temporary directories and Playwright's artifact directory.
+- Expand the disposable Compose check to enforce owner approval, denial and blocked access after revocation.
+- Reorganize installation, MCP and troubleshooting instructions, and add a documentation index and development guide. Record the September 19 website, native and container verification with explicit real-service limitations.
+
 ## 0.1.0-rc.1
 
 Initial self-hosted Broker core for a single owner, multiple accounts and multiple agents. Includes private enrollment, wrapped-key encrypted vault, owner administration, strict six-tool MCP bridge, authenticated gateway, trusted policy enforcement, single-use approvals, ephemeral browser sessions, fixed-destination networking, invoice retrieval, revocation, local audit/metrics, encrypted backup/restore, migration and deployment documentation.

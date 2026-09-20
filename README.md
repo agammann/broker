@@ -1,82 +1,65 @@
 # Broker
 
-**Give your agents the access they need, with control you keep.**
+**Agent access. Your rules.**
 
-**[Visit the Broker website and interactive sample](https://broker-access.alx21.chatgpt.site/)**
+[Website and interactive sample](https://broker-access.alx21.chatgpt.site/) · [Installation](docs/INSTALL.md) · [Documentation](docs/README.md)
 
-The public website introduces Broker and includes a browser simulation with fictional data. Private account vaults run in your own installation.
+Broker is a service you run yourself to give AI agents narrowly scoped account access. You enroll credentials privately and choose the allowed operation. Broker checks permission, handles authentication and the browser session, and returns structured invoice records through MCP.
 
-Broker is a self-hosted, single-owner service for delegating narrow account operations to agents. An owner privately enrolls credentials and grants access. A trusted service checks permission, authenticates with password and TOTP, owns the browser session, and returns structured invoice records through MCP.
+**Early release candidate: 0.1.0-rc.1.** Only the bundled synthetic test portal is implemented. No real business portal is claimed compatible. The public website includes a fictional browser simulation; it does not host private customer vaults.
 
-**Status: early release candidate, 0.1.0-rc.1. The bundled test portal is implemented. No real business portal is claimed compatible.** The first usable release remains blocked on owner selection and authorized verification of a real integration. Passing tests does not constitute an independent security audit or establish production security.
+## Start here
 
-## What is included
+| You want to…                                       | Start with…                                                                          |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Understand the idea without installing anything    | [Public website and interactive sample](https://broker-access.alx21.chatgpt.site/)   |
+| Run the owner dashboard locally                    | [Windows installation](docs/INSTALL.md#windows-first-run)                            |
+| Exercise the complete account and invoice workflow | [Bundled test portal walkthrough](docs/INSTALL.md#try-the-bundled-test-portal)       |
+| Run the services in containers                     | [Docker Compose](docs/INSTALL.md#docker-compose)                                     |
+| Connect an MCP client                              | [MCP setup and first invoice read](docs/MCP.md)                                      |
+| Review implementation and limitations              | [Security model](docs/SECURITY.md) and [verification evidence](docs/VERIFICATION.md) |
 
-- React owner dashboard: overview, accounts, agents and grants, approvals, sessions, activity, vault and maintenance.
-- Separate agent gateway and trusted owner/vault service; internal authentication and repeated trusted policy checks.
-- AES-256-GCM encrypted records; random data key wrapped using a separate vault passphrase and scrypt. Locked after restart.
-- Agent credentials stored as SHA-256 verifiers; expiration, rotation, revocation, exact single-use approvals, bounded sessions, request rate and concurrency limits.
-- Ephemeral Chromium contexts, fixed adapter destinations, DNS-checked connection proxy, no exported cookies, passwords, or TOTP tools.
-- Invoice-only MCP tools, encrypted backup and verified restore, migrations, retention, local activity and metrics.
+## What Broker does
 
-## Run locally
+1. **You define access.** Enroll an account privately, register an agent, and grant a specific operation with dates, expiration, and optional approval.
+2. **Broker enforces it.** The trusted service checks policy before authentication, before reads, and before returning results.
+3. **The agent gets the result.** The MCP interface returns invoice records. It does not export account passwords, authenticator secrets, or cookies.
+4. **You can stop access.** Revoke a grant, rotate an agent credential, or lock the vault. Information already returned cannot be recalled.
 
-Use Node **24 LTS** (24.19.0 or newer in the 24.x line), pnpm **11.19.0**, and Chromium installed by Playwright. See [installation](docs/INSTALL.md) for Windows permissions, fixture mode and Compose.
+The application includes an owner dashboard, an encrypted SQLite vault, a separate agent gateway, six MCP tools, temporary Chromium sessions, activity history, and encrypted backup and restore.
 
-```sh
-pnpm install --frozen-lockfile
-pnpm exec playwright install chromium
-pnpm build
-pnpm run init
-pnpm start
-```
-
-In a second terminal, start the agent gateway:
+## Get the source
 
 ```sh
-pnpm gateway
+git clone https://github.com/agammann/broker.git
+cd broker
 ```
 
-Open **http://127.0.0.1:4310**. Read `.secrets/setup` privately, then create an owner password and a **different** vault passphrase in Broker. Never paste them into an agent conversation. Default installation has no external adapter and no sample account. Follow the fixture instructions to exercise the bundled portal.
+For native Windows, use Node **24.19.0 or newer within 24.x** and pnpm **11.19.0**. Continue with the [installation guide](docs/INSTALL.md), which covers private initialization, filesystem permissions, service startup, and expected results. No AI API key is needed for the bundled workflow.
 
-## Agent connection
+A default installation has an empty, locked vault and no enabled adapter. That is expected. Use the opt-in test portal instructions to retrieve synthetic invoices.
 
-Register an agent in the dashboard and save its one-time credential to a private file outside the agent's repository. Configure its MCP client with an absolute bridge path and private credential file:
+## Repository map
 
-```json
-{
-  "mcpServers": {
-    "broker": {
-      "command": "node",
-      "args": ["/absolute/path/to/broker/dist/mcp/bridge.js"],
-      "env": {
-        "BROKER_AGENT_CREDENTIAL_FILE": "/private/path/agent-credential.txt",
-        "BROKER_GATEWAY_URL": "http://127.0.0.1:4311"
-      }
-    }
-  }
-}
-```
+| Location                                                      | Purpose                                                  |
+| ------------------------------------------------------------- | -------------------------------------------------------- |
+| [src/ui](src/ui)                                              | Owner dashboard                                          |
+| [src/core](src/core)                                          | Vault, database, policy, and session lifecycle           |
+| [src/server](src/server)                                      | Owner service and agent gateway                          |
+| [src/mcp](src/mcp)                                            | MCP bridge and example client                            |
+| [src/adapters](src/adapters) and [src/fixtures](src/fixtures) | Restricted browser adapter and synthetic portal          |
+| [tests](tests)                                                | Unit, integration, browser, and manual Compose checks    |
+| [deploy](deploy) and [compose.yaml](compose.yaml)             | Container configuration and sandbox policy               |
+| [docs](docs/README.md)                                        | Setup, operation, compatibility, and verification guides |
 
-Use Windows absolute paths with escaped backslashes where appropriate. This credential authorizes the agent; account passwords, authenticator secrets and cookies never go to the agent. No AI API key is needed. [MCP reference and executable client](docs/MCP.md).
+The public visitor website is maintained separately from this application checkout. [Development instructions](CONTRIBUTING.md) explain the local checks and test artifacts. [Release notes](CHANGELOG.md) and the [implementation checklist](PLAN.md) record status and remaining integration work.
 
-## Documentation
+## Deployment boundary
 
-- [Installation and shutdown](docs/INSTALL.md)
-- [Architecture and threat model](docs/SECURITY.md)
-- [Adapters and compatibility](docs/ADAPTERS.md)
-- [Backup, recovery, upgrade and rollback](docs/OPERATIONS.md)
-- [Troubleshooting](docs/TROUBLESHOOTING.md)
-- [Verification evidence and platform matrix](docs/VERIFICATION.md)
-- [Release notes and blockers](CHANGELOG.md)
-- [Implementation checklist](PLAN.md)
+Run Broker under an owner-controlled OS account or dedicated host. Agents must not have access to its administrator account, vault files, internal credentials, owner browser, or Docker socket. Running every component under one OS identity is a development topology, not filesystem isolation.
 
-Run `pnpm check` for lint, types, unit/integration/MCP tests, production build and owner browser tests. Tests use clearly marked synthetic credentials and invoices, with recording disabled. No external telemetry is configured.
+Delegating both password and TOTP removes the independence of a human-held second factor. Read the [security model](docs/SECURITY.md) before changing deployment boundaries. Passing tests is not an independent security certification.
 
-## Security model
+## Licensing
 
-Run Broker under an owner-controlled OS account or dedicated host. Do not give agents access to that host, its administrator account, vault volumes, internal credentials, owner browser, or Docker socket. An unrestricted agent on the Broker host can defeat the boundary. Unattended delegation of both password and TOTP removes the independence of a human-held second factor. Vault lock or revocation cannot erase invoice information already returned.
-
-## Repository and licensing
-
-This repository is public for review. No open-source or commercial license is granted in this release candidate; licensing is an owner decision before distribution. Do not interpret public visibility as permission to use proprietary code under an unstated license.
+This repository is public for review. No open source or commercial license is granted in this release candidate; licensing remains an owner decision before distribution. Third party notices are recorded in [deploy/NOTICE.md](deploy/NOTICE.md).

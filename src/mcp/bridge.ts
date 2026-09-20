@@ -6,7 +6,10 @@ import { toolSchemas } from "../shared/schemas.js";
 const file = process.env.BROKER_AGENT_CREDENTIAL_FILE;
 if (!file) throw new Error("BROKER_AGENT_CREDENTIAL_FILE is required");
 const credential = readFileSync(file, "utf8").trim(),
-  url = process.env.BROKER_GATEWAY_URL ?? "http://127.0.0.1:4311";
+  url = (process.env.BROKER_GATEWAY_URL ?? "http://127.0.0.1:4311").replace(
+    /\/+$/,
+    "",
+  );
 const u = new URL(url);
 if (
   u.protocol !== "https:" &&

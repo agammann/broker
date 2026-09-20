@@ -1,6 +1,7 @@
 import { it, expect, afterEach } from "vitest";
 import { mkdtempSync, rmSync } from "node:fs";
 import { resolve } from "node:path";
+import { tmpdir } from "node:os";
 import { DB } from "../src/core/db.js";
 import { Broker } from "../src/core/broker.js";
 import {
@@ -332,7 +333,7 @@ it("validates backup integrity before replacement and restores locked with revok
   ).toBe(fixture.username);
 });
 it("restarts locked, migrates fresh files and terminates stale requests", async () => {
-  const root = mkdtempSync(resolve("../../work/restart-"));
+  const root = mkdtempSync(resolve(tmpdir(), "broker-restart-"));
   try {
     const c = await setup(
       true,

@@ -1,6 +1,23 @@
 # Verification evidence
 
-Final verification: 2026-09-11 UTC / 2026-09-10 Pacific. This file records observed results, not an independent security certification.
+Latest functional verification: September 19, 2026 (Pacific). This file records observed results, not an independent security certification or a real-customer acceptance study.
+
+## September 19 functional verification
+
+- The published [visitor website](https://broker-access.alx21.chatgpt.site/) passed a browser walkthrough of approval, reading two fictional records, revocation, blocked subsequent reads, reset, and denial. At 390 × 844, controls remained usable without horizontal overflow. No browser console errors were observed. This is the public simulation, not a connection to a private Broker vault.
+- On Windows with Node 24.19.0 and pnpm 11.19.0, `pnpm check` passed lint, type checking, 34 unit/integration tests across six files, the production build, and one owner browser workflow. The browser workflow uses disposable state and includes mobile layout checks.
+- A reproduced MCP configuration defect caused a gateway URL ending in `/` to request `//v1/tool` and fail with a route-not-found response. The integration regression failed before the bridge normalized trailing slashes; both URL variants passed after the fix through the actual gateway, Chromium login and invoice retrieval.
+- A fresh disposable Docker Compose installation using Docker 29.8.0 with Linux containers passed owner setup, private enrollment, explicit owner denial, a separately approved request, sandboxed password/TOTP login, actual stdio MCP retrieval of two synthetic invoices, session closure, denied access after grant revocation, and encrypted backup/restore. Restore left the vault locked and restored agents revoked. No existing owner vault was used.
+- `pnpm audit --prod` reported no known production dependency vulnerabilities at the time of the check.
+- The documentation audit checked 14 Markdown files, 50 repository links/anchors and 16 public URLs without a broken destination. GitHub's website field points to the visitor website above. Native loopback URLs and private/example domains are intentionally documented setup values.
+
+Test files now use OS temporary directories and Playwright's ignored `test-results/` output directory, so a fresh checkout does not require a `work` directory outside the repository. Installation and MCP instructions include the fixture workflow, expected output, current access windows versus invoice dates, and troubleshooting.
+
+These results establish the bundled workflow only. A real external service has not been selected or implemented, private remote HTTPS has not been deployed here, and no tests with independent real users have been performed. Those remain prerequisites to claiming readiness for real customer accounts.
+
+## September 11 verification record
+
+The following record is retained from September 11, 2026 UTC / September 10 Pacific. Its test counts and security scan describe that earlier snapshot.
 
 ## Native checks
 

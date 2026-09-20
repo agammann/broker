@@ -2,6 +2,7 @@
 // This never prints setup tokens, owner/vault passwords or agent credentials.
 import { readFileSync, mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { resolve } from "node:path";
+import { tmpdir } from "node:os";
 import { randomUUID } from "node:crypto";
 import { setTimeout as delay } from "node:timers/promises";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -78,12 +79,12 @@ const config = {
   max_session_seconds: 60,
   rate: 60,
   concurrency: 1,
-  approval_required: false,
+  approval_required: true,
   from: "2026-01-01",
   to: "2026-12-31",
 };
 const grant = await owner("grants", config);
-const root = mkdtempSync(resolve("../../work/compose-")),
+const root = mkdtempSync(resolve(tmpdir(), "broker-compose-")),
   file = resolve(root, "agent");
 writeFileSync(file, String(agent.credential), { mode: 0o600 });
 const client = new Client({ name: "compose-verification", version: "1.0.0" });
@@ -116,6 +117,25 @@ try {
     reason: "Disposable Compose verification",
     idempotency_key: randomUUID(),
   });
+  if (request.status !== "pending_approval")
+    throw Error("Session must wait for owner approval");
+  await owner(`approvals/${request.request_id}`, { approve: false });
+  const denied = await call("broker.get_request", {
+    request_id: request.request_id,
+  });
+  if (denied.status !== "denied") throw Error("Owner denial was not enforced");
+  request = await call("broker.request_session", {
+    account_id: account.id,
+    requested_operation: "read_invoices",
+    reason: "Disposable Compose verification after denied request",
+    idempotency_key: randomUUID(),
+  });
+  if (request.status !== "pending_approval")
+    throw Error("New request must require its own approval");
+  await owner(`approvals/${request.request_id}`, { approve: true });
+  request = await call("broker.get_request", {
+    request_id: request.request_id,
+  });
   for (let i = 0; i < 120 && request.status === "authenticating"; i++) {
     await delay(500);
     request = await call("broker.get_request", {
@@ -138,6 +158,21 @@ try {
     id: grant.id,
     confirmation: "REVOKE",
   });
+  const rejected = await client.callTool({
+    name: "broker.request_session",
+    arguments: {
+      account_id: account.id,
+      requested_operation: "read_invoices",
+      reason: "Must fail after revocation",
+      idempotency_key: randomUUID(),
+    },
+  });
+  if (
+    !rejected.isError ||
+    (rejected.structuredContent as { code?: string })?.code !==
+      "permission_denied"
+  )
+    throw Error("Revocation did not deny the next session request");
   await owner("vault/restore", { backup, passphrase, confirmation: "RESTORE" });
   cookie = "";
   csrf = "";
@@ -148,7 +183,7 @@ try {
   if (!(state.agents as { revoked: boolean }[]).every((a) => a.revoked))
     throw Error("Restore must revoke agents");
   process.stdout.write(
-    "PASS: Compose owner setup, private enrollment, sandboxed browser login, real MCP invoice read, session close, grant revocation, encrypted backup and verified restore.\n",
+    "PASS: Compose owner setup, private enrollment, exact approval and denial, sandboxed browser login, real MCP invoice read, session close, blocked access after revocation, encrypted backup and verified restore.\n",
   );
 } finally {
   await client.close();

@@ -1,9 +1,8 @@
 import { test, expect } from "@playwright/test";
-import { resolve } from "node:path";
 import { fixture, ownerPassword, passphrase } from "../helpers.js";
 test("fresh installation: private setup, dashboard, unlock, enroll, verify, grant, revoke and lock", async ({
   page,
-}) => {
+}, testInfo) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("/");
@@ -22,7 +21,7 @@ test("fresh installation: private setup, dashboard, unlock, enroll, verify, gran
   ).toBeVisible();
   await page.setViewportSize({ width: 1536, height: 1024 });
   await page.screenshot({
-    path: resolve("../../work/broker-overview.png"),
+    path: testInfo.outputPath("broker-overview.png"),
     fullPage: true,
   });
   await page.getByRole("button", { name: "Unlock vault", exact: true }).click();
@@ -104,7 +103,7 @@ test("fresh installation: private setup, dashboard, unlock, enroll, verify, gran
     ),
   ).toBe(true);
   await page.screenshot({
-    path: resolve("../../work/broker-mobile.png"),
+    path: testInfo.outputPath("broker-mobile.png"),
     fullPage: true,
   });
   expect(errors).toEqual([]);

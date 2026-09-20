@@ -1,5 +1,24 @@
 # Troubleshooting
 
+[Documentation index](README.md) · [Installation](INSTALL.md)
+
+## First-run problems
+
+| Symptom                                               | What to check                                                                                                                     |
+| ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm` is not recognized                              | Install the pinned version with `npm install --global pnpm@11.19.0`, then verify `pnpm --version`.                                |
+| Missing `dist/server/main.js` or `dist/mcp/bridge.js` | Run `pnpm build` from the repository directory.                                                                                   |
+| Missing `.secrets/setup` or `.secrets/internal`       | Run `pnpm run init` from the repository directory; do not print the resulting files.                                              |
+| Dashboard cannot be reached                           | Keep `pnpm start` running and use `http://127.0.0.1:4310`. The public website is not the owner dashboard.                         |
+| `EADDRINUSE`                                          | Another process owns a required port. Stop your previous Broker instance gracefully; do not kill an unidentified process.         |
+| No installed adapter                                  | Default mode intentionally has none. Enable the bundled test portal using the installation guide and restart the trusted service. |
+| Fixture generator reports `EEXIST`                    | Reuse the existing private fixture file instead of running generation again.                                                      |
+| MCP account list is empty                             | Verify account connection, the exact agent/account grant, current access window, and agent expiration.                            |
+| MCP client waits without invoice results              | Check **Approvals** and approve the exact request before the five-minute deadline.                                                |
+| Docker is unavailable or cannot run the images        | Confirm Docker's Linux engine is running using `docker version`. Do not run native and Compose services on the same ports.        |
+
+## Application errors
+
 | Symptom / code                              | Action                                                                                                                                                       |
 | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | setup_required                              | Run private initialization and finish the owner setup form.                                                                                                  |

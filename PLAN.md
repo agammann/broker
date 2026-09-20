@@ -16,7 +16,7 @@
 
 Single trusted Fastify process owns SQLite, keys, policy and ephemeral browser contexts. Separate Fastify gateway forwards the agent bearer credential over an authenticated internal channel; only the trusted service resolves identity. Stdio bridge holds only its agent credential. Owner HTTP listener is separate from internal listener. Only fixture adapter is installed initially; no external compatibility is implied.
 
-Public source publication to agammann/broker is authorized. Public application deployment has not been requested. Local source and release evidence live here. Native Windows and Docker verification results are recorded in docs/VERIFICATION.md.
+The application source is public at [agammann/broker](https://github.com/agammann/broker). The [public visitor website](https://broker-access.alx21.chatgpt.site/) is hosted separately on OpenAI Sites and includes a fictional browser simulation. Private customer vaults are not hosted there. Native Windows and Docker verification results are recorded in [verification evidence](docs/VERIFICATION.md).
 
 ## UI tokens
 

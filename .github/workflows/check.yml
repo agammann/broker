@@ -12,7 +12,6 @@ jobs:
         with:
           node-version: "24"
       - run: npm install --global pnpm@11.19.0
-      - run: New-Item -ItemType Directory -Force ../../work
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install chromium
       - run: pnpm check
