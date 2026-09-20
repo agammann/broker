@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Close the current delivery scope as a tested self-hosted release candidate with the bundled synthetic portal. Real external account integration is deferred; no additional provider is included.
+
 - Fix MCP gateway URLs with a trailing slash producing a route-not-found response. The regression exercises both URL forms through the actual MCP and browser workflow.
 - Make tests portable to a fresh checkout by using OS temporary directories and Playwright's artifact directory.
 - Expand the disposable Compose check to enforce owner approval, denial and blocked access after revocation.

@@ -2,6 +2,12 @@
 
 Latest functional verification: September 19, 2026 (Pacific). This file records observed results, not an independent security certification or a real-customer acceptance study.
 
+## Delivery closeout
+
+On September 19, the owner limited the remaining work to what can be completed without an external test account. A final native `pnpm check` passed lint, type checking, all 34 unit/integration tests in six files, the production build and the owner browser workflow. The production dependency audit reported no known vulnerabilities. A fresh documentation audit passed all 50 local links/anchors and 16 public URLs across 14 Markdown files; GitHub's website field matches the public sample site. The live website returned HTTP 200 and retained its fictional simulation labeling.
+
+The current delivery is complete as a tested release candidate with the bundled synthetic portal. Real external account integration is deferred and unavailable. The earlier Docker and visual browser results below were not rerun for this documentation-only closeout.
+
 ## September 19 functional verification
 
 - The published [visitor website](https://broker-access.alx21.chatgpt.site/) passed a browser walkthrough of approval, reading two fictional records, revocation, blocked subsequent reads, reset, and denial. At 390 × 844, controls remained usable without horizontal overflow. No browser console errors were observed. This is the public simulation, not a connection to a private Broker vault.

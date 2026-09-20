@@ -1,5 +1,9 @@
 # Broker implementation checklist
 
+## Current delivery scope
+
+As of September 19, 2026, this work is complete within the owner-approved scope: the self-hosted release candidate, bundled synthetic portal, public sample website, setup and recovery instructions, and recorded verification. Real external account integration is deferred. The unchecked items below describe future work, not compatibility provided by this candidate.
+
 - [x] Inspect workspace, instructions, runtime, official documentation and package registry.
 - [x] Establish dashboard visual direction and service boundaries.
 - [x] Implement encrypted vault, migrations, private owner setup and maintenance.
@@ -9,8 +13,8 @@
 - [x] Connect responsive owner dashboard to real backend state.
 - [x] Run security regression, integration, MCP and browser end-to-end tests.
 - [x] Prepare installation, recovery, deployment and release evidence.
-- [ ] Owner selects real portal; investigate supported delegation/API first.
-- [ ] Privately enroll and verify selected real integration. External dependency.
+- [ ] Deferred: select an authorized real portal and investigate supported delegation/API first.
+- [ ] Deferred: implement, privately enroll and verify the selected real integration.
 
 ## Decisions
 
