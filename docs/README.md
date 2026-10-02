@@ -13,6 +13,7 @@ Start with installation, then the bundled test portal and MCP example. The websi
 | Review trust boundaries and deployment limitations   | [Architecture and threat model](SECURITY.md)                                |
 | Understand adapter scope and unsupported flows       | [Adapters and compatibility](ADAPTERS.md)                                   |
 | Review recorded tests and unverified environments    | [Verification evidence](VERIFICATION.md)                                    |
+| Inspect the current dependency and token-denial checks | [October 2 verification](verification-2026-10-02.md) |
 | Find implementation reference material               | [Official references](REFERENCES.md)                                        |
 | Work on the repository and run its checks            | [Development guide](../CONTRIBUTING.md)                                     |
 | Review release status and remaining work             | [Release notes](../CHANGELOG.md) and [implementation checklist](../PLAN.md) |

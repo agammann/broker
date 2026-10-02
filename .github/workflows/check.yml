@@ -4,7 +4,11 @@ permissions:
   contents: read
 jobs:
   verify:
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-22.04]
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -13,6 +17,33 @@ jobs:
           node-version: "24"
       - run: npm install --global pnpm@11.19.0
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install chromium
+      - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm check
-      - run: pnpm audit --prod
+      - run: pnpm audit --audit-level=low
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: broker-browser-${{ matrix.os }}
+          path: test-results/
+  compose:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: npm install --global pnpm@11.19.0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Initialize disposable fixture secrets
+        run: |
+          node scripts/init.mjs
+          node scripts/fixture-init.mjs
+          chmod 640 .secrets/internal .secrets/setup .secrets/fixture-users.json
+          sudo chown 1000:"$(id -g)" .secrets/internal .secrets/setup .secrets/fixture-users.json
+      - run: docker compose -p broker-verification -f compose.yaml -f compose.fixture.yaml up --build -d --wait
+      - run: node --import tsx tests/compose-smoke.ts
+      - name: Remove this disposable CI stack
+        if: always()
+        run: docker compose -p broker-verification -f compose.yaml -f compose.fixture.yaml down --volumes --remove-orphans
