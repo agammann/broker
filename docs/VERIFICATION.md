@@ -1,6 +1,6 @@
 # Verification evidence
 
-Latest functional verification: September 19, 2026 (Pacific). This file records observed results, not an independent security certification or a real-customer acceptance study.
+Latest functional verification: [October 2, 2026 UTC](verification-2026-10-02.md), including Windows, Linux and Docker Compose. The records below describe earlier snapshots, not an independent security certification or a real-customer acceptance study.
 
 ## Delivery closeout
 
@@ -54,9 +54,9 @@ Fixture tests use the actual bundled Fastify portal with synthetic credentials a
 
 Backup/restore and same-version migration/restart are tested. A separate physical-host disaster-recovery drill, cross-version migrations/downgrades, external remote logout semantics, real account lockout behavior and independent penetration testing remain outside these results.
 
-## Codex Security review
+## Earlier review scope
 
-Standard scan 181093d7-efba-4dfe-8277-dfdc48340885 completed on September 11, 2026 UTC. An independent AI baseline auditor, architecture reviewer and focused policy investigator reviewed 71 of 73 source files. No substantiated vulnerabilities were reported. Coverage is recorded as partial: dependency lock metadata and nonexecutable third party license were not fully audited; installed dependencies, generated bundles and private runtime files were excluded. This does not certify production security.
+The September 11 source review covered 71 of 73 source files and reported no substantiated vulnerabilities. Its coverage was partial: dependency lock metadata and nonexecutable third party license were not fully audited; installed dependencies, generated bundles and private runtime files were excluded. This historical result does not certify production security.
 
 The scan snapshot preceded the following reviewed correctness and packaging fixes: combined session and authentication capacity reservation with a final admission check; restore exclusion of overlapping unlock/passphrase changes; Caddy file capability removal; and the precise Chromium namespace chroot syscall allowance described in deploy/NOTICE.md. The first two have regressions that failed before the fix and passed afterward. Native checks and the complete Docker workflow passed after these fixes. The owner form also now uses local time for access defaults, verified in a Pacific timezone browser.
 
