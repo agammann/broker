@@ -36,6 +36,8 @@ Temporary test databases and agent credential files use unique OS temporary dire
 
 `tests/compose-smoke.ts` is a manual, state-changing verification script for a fresh disposable Compose project. It is not part of `pnpm check` and must not be pointed at an existing owner installation.
 
+[GitHub Actions](https://github.com/agammann/broker/actions/workflows/check.yml) runs `pnpm check` on Windows and Linux, audits all locked dependencies, and builds a fresh `broker-verification` Compose project to run the encrypted backup/restore and actual MCP/browser workflow. That job deletes only its disposable CI stack and volume after verification. Browser screenshots use fictional fixture state and are saved as CI artifacts; secrets and backups are excluded.
+
 ## Make reviewable changes
 
 1. Keep changes scoped and update the relevant guide when commands or behavior change.

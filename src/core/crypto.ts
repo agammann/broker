@@ -27,8 +27,11 @@ export type Wrapped = z.infer<typeof wrapSchema>;
 export const token = () => randomBytes(32).toString("base64url");
 export const digest = (s: string) =>
   createHash("sha256").update(s).digest("hex");
-export const equal = (a: string, b: string) =>
-  a.length === b.length && timingSafeEqual(Buffer.from(a), Buffer.from(b));
+export const equal = (a: string, b: string) => {
+  const left = Buffer.from(a),
+    right = Buffer.from(b);
+  return left.length === right.length && timingSafeEqual(left, right);
+};
 export function kdf(pass: string, salt: Buffer): Promise<Buffer> {
   return new Promise((resolve, reject) =>
     rawScrypt(

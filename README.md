@@ -54,6 +54,8 @@ A default installation has an empty, locked vault and no enabled adapter. That i
 
 The public visitor website is maintained separately from this application checkout. [Development instructions](CONTRIBUTING.md) explain the local checks and test artifacts. [Release notes](CHANGELOG.md) and the [implementation checklist](PLAN.md) record status and remaining integration work.
 
+See the [October 2 verification record](docs/verification-2026-10-02.md) for current native checks and the malformed-token regression, and [GitHub Actions](https://github.com/agammann/broker/actions/workflows/check.yml) for Windows, Linux and disposable Compose results.
+
 ## Deployment boundary
 
 Run Broker under an owner-controlled OS account or dedicated host. Agents must not have access to its administrator account, vault files, internal credentials, owner browser, or Docker socket. Running every component under one OS identity is a development topology, not filesystem isolation.

@@ -46,6 +46,15 @@ it("separates owner, internal and agent authentication; protects CSRF/Host/Origi
     expect(login.headers["set-cookie"]).toContain("SameSite=Strict");
     const cookie = String(login.headers["set-cookie"]).split(";")[0],
       csrf = login.json().csrf;
+    const malformed = await owner.inject({
+      method: "POST",
+      url: "/api/vault/lock",
+      headers: { ...headers, cookie, "x-csrf-token": "é".repeat(csrf.length) },
+      payload: {},
+    });
+    expect(malformed.statusCode).toBe(403);
+    expect(malformed.json()).toMatchObject({ code: "csrf_failed" });
+    expect(b.vault.unlocked).toBe(true);
     expect(
       (
         await owner.inject({
