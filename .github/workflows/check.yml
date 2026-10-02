@@ -40,8 +40,8 @@ jobs:
         run: |
           node scripts/init.mjs
           node scripts/fixture-init.mjs
-          sudo chown 1000:"$(id -g)" .secrets/internal .secrets/setup .secrets/fixture-users.json
           chmod 640 .secrets/internal .secrets/setup .secrets/fixture-users.json
+          sudo chown 1000:"$(id -g)" .secrets/internal .secrets/setup .secrets/fixture-users.json
       - run: docker compose -p broker-verification -f compose.yaml -f compose.fixture.yaml up --build -d --wait
       - run: node --import tsx tests/compose-smoke.ts
       - name: Remove this disposable CI stack
