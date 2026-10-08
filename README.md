@@ -6,7 +6,7 @@
 
 Broker is a service you run yourself to give AI agents narrowly scoped account access. You enroll credentials privately and choose the allowed operation. Broker checks permission, handles authentication and the browser session, and returns structured invoice records through MCP.
 
-**Early release candidate: 0.1.0-rc.1.** Only the bundled synthetic test portal is implemented. No real business portal is claimed compatible. The public website includes a fictional browser simulation; it does not host private customer vaults.
+**Version 1.0.0: a self-hosted developer starter.** Run the complete owner, vault, policy and MCP workflow against the bundled synthetic invoice portal, then build a separately verified adapter for your own integration. Only that bundled portal is implemented. The public website is a fictional browser simulation maintained separately; it does not host private vaults.
 
 ## Start here
 
@@ -30,8 +30,12 @@ The application includes an owner dashboard, an encrypted SQLite vault, a separa
 
 ## Get the source
 
+Download `broker_1.0.0_source.zip`, `release-manifest.json` and `SHA256SUMS` from [v1.0.0](https://github.com/agammann/broker/releases/tag/v1.0.0). Check the ZIP with `Get-FileHash -Algorithm SHA256` on Windows or `sha256sum` on Linux, compare the filename and hash with `SHA256SUMS`, and extract into a new directory. The manifest records the exact source commit, tree and container inputs. The extracted `broker-1.0.0` directory includes the frozen lockfile, MIT license, migrations and all installation guides.
+
+Developers can also clone the release:
+
 ```sh
-git clone https://github.com/agammann/broker.git
+git clone --branch v1.0.0 https://github.com/agammann/broker.git
 cd broker
 ```
 
@@ -54,7 +58,7 @@ A default installation has an empty, locked vault and no enabled adapter. That i
 
 The public visitor website is maintained separately from this application checkout. [Development instructions](CONTRIBUTING.md) explain the local checks and test artifacts. [Release notes](CHANGELOG.md) and the [implementation checklist](PLAN.md) record status and remaining integration work.
 
-See the [October 2 verification record](docs/verification-2026-10-02.md) for current native checks and the malformed-token regression, and [GitHub Actions](https://github.com/agammann/broker/actions/workflows/check.yml) for Windows, Linux and disposable Compose results.
+See [v1 verification](docs/verification-v1.md) for the tested newcomer and recovery workflow. [Historical verification](docs/verification-2026-10-02.md) retains the October 2 malformed-token regression. [GitHub Actions](https://github.com/agammann/broker/actions/workflows/check.yml) checks Windows, Linux, fresh source extraction and disposable Compose.
 
 ## Deployment boundary
 
@@ -64,4 +68,4 @@ Delegating both password and TOTP removes the independence of a human-held secon
 
 ## Licensing
 
-This repository is public for review. No open source or commercial license is granted in this release candidate; licensing remains an owner decision before distribution. Third party notices are recorded in [deploy/NOTICE.md](deploy/NOTICE.md).
+Broker’s original source is available under the [MIT license](LICENSE). You can use, modify and distribute it with the license notice. Third-party components retain their own licenses; the Playwright-derived sandbox profile and notice are in [deploy/NOTICE.md](deploy/NOTICE.md).

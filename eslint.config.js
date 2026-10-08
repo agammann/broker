@@ -9,6 +9,8 @@ export default ts.config(
       "test-results/**",
       "playwright-report/**",
       "data/**",
+      "consumer-output/**",
+      "release-artifacts/**",
     ],
   },
   js.configs.recommended,
@@ -24,6 +26,8 @@ export default ts.config(
   },
   {
     files: ["scripts/*.mjs"],
-    languageOptions: { globals: { process: "readonly", console: "readonly" } },
+    languageOptions: {
+      globals: { process: "readonly", console: "readonly", Buffer: "readonly" },
+    },
   },
 );

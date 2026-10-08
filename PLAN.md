@@ -2,7 +2,7 @@
 
 ## Current delivery scope
 
-As of September 19, 2026, this work is complete within the owner-approved scope: the self-hosted release candidate, bundled synthetic portal, public sample website, setup and recovery instructions, and recorded verification. Real external account integration is deferred. The unchecked items below describe future work, not compatibility provided by this candidate.
+Version 1.0.0 is bounded to the self-hosted developer starter: owner dashboard, encrypted vault, policy-controlled MCP access, bundled synthetic invoice portal, setup and recovery instructions, and checked source delivery. The public sample website is maintained separately. The unchecked items below describe future integration work, not compatibility provided by v1.
 
 - [x] Inspect workspace, instructions, runtime, official documentation and package registry.
 - [x] Establish dashboard visual direction and service boundaries.

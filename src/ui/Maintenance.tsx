@@ -150,24 +150,28 @@ export function Maintenance({
           <Form
             busy={busy}
             onSubmit={(d, f) =>
-              run(async () => {
-                if (
-                  !confirm(
-                    "Replace all accounts and grants with this backup? Current sessions will close and restored agents will be revoked.",
+              run(
+                async () => {
+                  if (
+                    !confirm(
+                      "Replace all accounts and grants with this backup? Current sessions will close and restored agents will be revoked.",
+                    )
                   )
-                )
-                  return;
-                const file = d.get("backup") as File;
-                if (file.size > 8 * 1024 * 1024)
-                  throw Error("Backup is too large");
-                await api("vault/restore", {
-                  backup: JSON.parse(await file.text()),
-                  passphrase: text(d, "passphrase"),
-                  confirmation: text(d, "confirmation"),
-                });
-                f.reset();
-                refreshAuth();
-              }, "Backup restored. Sign in again.")
+                    return false;
+                  const file = d.get("backup") as File;
+                  if (file.size > 8 * 1024 * 1024)
+                    throw Error("Backup is too large");
+                  await api("vault/restore", {
+                    backup: JSON.parse(await file.text()),
+                    passphrase: text(d, "passphrase"),
+                    confirmation: text(d, "confirmation"),
+                  });
+                  f.reset();
+                  refreshAuth();
+                },
+                "Backup restored. Sign in again.",
+                false,
+              )
             }
           >
             <Field name="backup" label="Encrypted backup file" type="file" />

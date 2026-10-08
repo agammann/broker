@@ -47,4 +47,6 @@
 
 Check OS time synchronization for TOTP. Broker waits if the current code is near expiry or was recently used by that adapter; the fixture server rejects replay. No test portal recording is an acceptable substitute for real service verification.
 
+If Broker alone was just restarted while the bundled portal stayed running, the portal can still remember its last accepted code while Broker’s in-memory counter has reset. Wait a full authenticator period (30 seconds for the generated fixture), then use **Test connection** again before creating a fresh grant. Keep the portal’s replay check enabled; do not change credentials or repeatedly retry in the same period.
+
 PowerShell users with package cache access errors can place `XDG_CACHE_HOME` and pnpm's `--store-dir` inside an owner-controlled workspace directory. Do not commit caches or `.secrets`. Docker failures should be diagnosed with `docker compose ps` and health status; avoid sharing environment dumps or volume contents.

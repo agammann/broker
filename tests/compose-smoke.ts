@@ -4,11 +4,16 @@ import { readFileSync, mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { randomUUID } from "node:crypto";
+import { execFileSync } from "node:child_process";
 import { setTimeout as delay } from "node:timers/promises";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { token } from "../src/core/crypto.js";
 const origin = "http://127.0.0.1:4310";
+const project =
+  process.env.BROKER_SMOKE_COMPOSE_PROJECT ?? "broker-verification";
+if (!/^broker-(verification|v1-\d{8}(?:-recovery|-final)?)$/.test(project))
+  throw Error("Restart check requires a named disposable verification project");
 for (let attempt = 0; ; attempt++) {
   try {
     const health = await fetch(origin + "/health", {
@@ -56,7 +61,11 @@ await owner("login", { password });
 await owner("vault/unlock", { passphrase });
 const [fixture] = JSON.parse(
   readFileSync(".secrets/fixture-users.json", "utf8"),
-) as { username: string; password: string; totp: { secret: string } }[];
+) as {
+  username: string;
+  password: string;
+  totp: { secret: string; period: number };
+}[];
 const account = await owner("accounts", {
   label: "Compose synthetic account",
   adapter: "test-portal",
@@ -152,6 +161,53 @@ try {
   if ((result.invoices as unknown[]).length !== 2)
     throw Error("Fixture invoice count mismatch");
   await call("broker.close_session", { session_id: request.session_id });
+  const expiry = Date.now() + 5000;
+  const expiringAgent = await owner("agents", {
+    label: "Compose expiry check",
+    expires: expiry,
+  });
+  const expiryFile = resolve(root, "expiring-agent");
+  writeFileSync(expiryFile, String(expiringAgent.credential), { mode: 0o600 });
+  const expiryClient = new Client({ name: "compose-expiry", version: "1.0.0" });
+  try {
+    await expiryClient.connect(
+      new StdioClientTransport({
+        command: process.execPath,
+        args: [resolve("dist/mcp/bridge.js")],
+        env: {
+          ...Object.fromEntries(
+            Object.entries(process.env).filter(
+              (entry): entry is [string, string] => entry[1] !== undefined,
+            ),
+          ),
+          BROKER_AGENT_CREDENTIAL_FILE: expiryFile,
+          BROKER_GATEWAY_URL: "http://127.0.0.1:4311",
+        },
+        stderr: "pipe",
+      }),
+    );
+    if (
+      (
+        await expiryClient.callTool({
+          name: "broker.list_accounts",
+          arguments: {},
+        })
+      ).isError
+    )
+      throw Error("Fresh short-lived agent was rejected before expiry");
+    await delay(Math.max(0, expiry - Date.now() + 200));
+    const expired = await expiryClient.callTool({
+      name: "broker.list_accounts",
+      arguments: {},
+    });
+    if (
+      !expired.isError ||
+      (expired.structuredContent as { code?: string })?.code !== "invalid_agent"
+    )
+      throw Error("Actual agent expiration was not enforced");
+  } finally {
+    await expiryClient.close();
+  }
   const backup = await owner("vault/backup", {});
   await owner("revoke", {
     kind: "grant",
@@ -182,8 +238,55 @@ try {
     throw Error("Restore must lock vault");
   if (!(state.agents as { revoked: boolean }[]).every((a) => a.revoked))
     throw Error("Restore must revoke agents");
+  execFileSync(
+    "docker",
+    [
+      "compose",
+      "-p",
+      project,
+      "-f",
+      "compose.yaml",
+      "-f",
+      "compose.fixture.yaml",
+      "restart",
+      "trusted",
+      "gateway",
+    ],
+    { stdio: "pipe", windowsHide: true },
+  );
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const health = await fetch(origin + "/health", {
+        signal: AbortSignal.timeout(2000),
+      });
+      if (health.ok) break;
+    } catch {
+      /* Wait for the owned Compose restart. */
+    }
+    if (attempt >= 59)
+      throw Error("Restarted Compose owner did not become healthy");
+    await delay(1000);
+  }
+  cookie = "";
+  csrf = "";
+  await owner("login", { password });
+  const restarted = await owner("state");
+  if (
+    (restarted.vault as { unlocked: boolean }).unlocked ||
+    (restarted.accounts as unknown[]).length !== 1 ||
+    !(restarted.agents as { revoked: boolean }[]).every((a) => a.revoked)
+  )
+    throw Error(
+      "Restart did not preserve locked restored state and revoked authority",
+    );
+  await owner("vault/unlock", { passphrase });
+  // The portal still retains replay state across a Broker-only restart.
+  // Await an actual new code period; never reuse or weaken its replay rule.
+  await delay(fixture.totp.period * 1000 + 200);
+  await owner(`accounts/${account.id}/verify`, {});
+  await owner("vault/lock", {});
   process.stdout.write(
-    "PASS: Compose owner setup, private enrollment, exact approval and denial, sandboxed browser login, real MCP invoice read, session close, blocked access after revocation, encrypted backup and verified restore.\n",
+    "PASS: Compose owner setup, private enrollment, exact approval and denial, sandboxed browser login, real MCP invoice read, session close, actual agent expiry, blocked access after revocation, encrypted backup/restore, graceful restart with retained volume, locked startup and restored-account re-verification.\n",
   );
 } finally {
   await client.close();

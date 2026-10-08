@@ -12,6 +12,7 @@ import {
 export type Run = (
   fn: () => Promise<unknown>,
   success?: string,
+  refreshState?: boolean,
 ) => Promise<void>;
 export function Accounts({
   state,
