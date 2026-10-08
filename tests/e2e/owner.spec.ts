@@ -5,6 +5,9 @@ test("fresh installation: private setup, dashboard, unlock, enroll, verify, gran
 }, testInfo) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
+  page.on("console", (message) => {
+    if (message.type() === "error") errors.push(message.text());
+  });
   await page.goto("/");
   await expect(
     page.getByRole("heading", { name: "Keep control of account access" }),
@@ -90,8 +93,40 @@ test("fresh installation: private setup, dashboard, unlock, enroll, verify, gran
   await page
     .getByRole("button", { name: "Vault & maintenance", exact: true })
     .click();
+  const backupDownload = page.waitForEvent("download");
+  await page
+    .getByRole("button", { name: "Download encrypted backup", exact: true })
+    .click();
+  const backupFile = await (await backupDownload).path();
+  expect(backupFile).not.toBeNull();
   await page.getByRole("button", { name: "Lock vault now" }).click();
   await expect(page.getByText("Your vault is locked")).toBeVisible();
+  await page.getByLabel("Encrypted backup file").setInputFiles(backupFile!);
+  await page.getByLabel("Backup vault passphrase").fill(passphrase);
+  await page.getByLabel("Type RESTORE to replace current data").fill("RESTORE");
+  page.once("dialog", (dialog) => dialog.dismiss());
+  await page
+    .getByRole("button", { name: "Restore backup", exact: true })
+    .click();
+  await expect(
+    page.getByText("Backup restored. Sign in again.", { exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "Vault & maintenance", exact: true }),
+  ).toBeVisible();
+  page.once("dialog", (dialog) => dialog.accept());
+  await page
+    .getByRole("button", { name: "Restore backup", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Welcome back" }),
+  ).toBeVisible();
+  await page.getByLabel("Owner password", { exact: true }).fill(ownerPassword);
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Overview", exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole("alert")).toHaveCount(0);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole("button", { name: "Overview", exact: true }).click();
   await expect(
@@ -106,5 +141,11 @@ test("fresh installation: private setup, dashboard, unlock, enroll, verify, gran
     path: testInfo.outputPath("broker-mobile.png"),
     fullPage: true,
   });
+  for (const width of [390, 320]) {
+    await page.setViewportSize({ width, height: 844 });
+    await expect(
+      page.getByRole("button", { name: "Sign out", exact: true }),
+    ).toBeVisible();
+  }
   expect(errors).toEqual([]);
 });

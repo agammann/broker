@@ -1,6 +1,16 @@
 # Release notes
 
-## Unreleased
+## 1.0.0
+
+- Release the self-hosted owner dashboard, encrypted vault, policy-controlled gateway and six-tool stdio MCP workflow as a developer starter. The bundled synthetic invoice portal is the only implemented adapter; the public website remains a separate fictional sample.
+- Keep Sign out available on narrow screens, including 320px layouts.
+- Clear cached dashboard state after restore or sign-out, return the next login to Overview, and avoid requesting protected state after those actions invalidate the owner session.
+- Leave a cancelled restore unchanged without displaying a restoration success message.
+- Update compatible dependencies, including the MCP SDK and patchable transitive packages, and pin the tested direct versions.
+- Add the MIT license, exact source ZIP and manifest/checksums, fresh extraction checks, and a guarded immutable release workflow.
+- Clarify installation, supported platforms, encrypted recovery and same-version update boundaries. Migration 001 remains the only database schema; no third-party integration or cross-schema upgrade is included.
+
+## Earlier release-candidate changes
 
 - Close the current delivery scope as a tested self-hosted release candidate with the bundled synthetic portal. Real external account integration is deferred; no additional provider is included.
 
@@ -15,7 +25,9 @@ Initial self-hosted Broker core for a single owner, multiple accounts and multip
 
 The included adapter is **the bundled synthetic test portal only**. Real compatibility has not been implemented or inferred. The default installation does not enable fixture mode.
 
-### Release blockers
+### Historical release-candidate integration goals
+
+Version 1.0.0 above intentionally ships the supported developer starter. The following goals belonged to the earlier real-portal release plan and remain outside its scope.
 
 - Owner must select a real invoice portal. Review official API/delegated-access options before implementing browser login.
 - At least one real integration must be implemented and verified through privately enrolled, authorized access before calling the first usable release complete.

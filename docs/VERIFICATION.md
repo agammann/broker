@@ -1,6 +1,6 @@
 # Verification evidence
 
-Latest functional verification: [October 2, 2026 UTC](verification-2026-10-02.md), including Windows, Linux and Docker Compose. The records below describe earlier snapshots, not an independent security certification or a real-customer acceptance study.
+Current release verification: [version 1.0.0](verification-v1.md). Historical functional verification: [October 2, 2026 UTC](verification-2026-10-02.md), including Windows, Linux and Docker Compose. The records below describe earlier snapshots, not an independent security certification or a real-customer acceptance study.
 
 ## Delivery closeout
 

@@ -79,22 +79,28 @@ export function App() {
     refreshAuth();
   }, [refreshAuth]);
   useEffect(() => {
-    if (!auth?.authenticated) return;
+    if (!auth?.authenticated) {
+      setState(undefined);
+      setPage("Overview");
+      setError("");
+      setNotice("");
+      return;
+    }
     void refresh();
     const t = setInterval(() => {
       void refresh();
     }, 5000);
     return () => clearInterval(t);
   }, [auth?.authenticated, refresh]);
-  const run: Run = async (fn, success) => {
+  const run: Run = async (fn, success, refreshState = true) => {
     if (busy) return;
     setBusy(true);
     setError("");
     setNotice("");
     try {
-      await fn();
+      if ((await fn()) === false) return;
       setNotice(success ?? "Changes saved.");
-      await refresh();
+      if (refreshState) await refresh();
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -164,11 +170,14 @@ export function App() {
           <button
             className="secondary"
             onClick={() =>
-              void run(async () => {
-                await api("logout", {});
-                setState(undefined);
-                refreshAuth();
-              })
+              void run(
+                async () => {
+                  await api("logout", {});
+                  refreshAuth();
+                },
+                "Signed out.",
+                false,
+              )
             }
           >
             Sign out

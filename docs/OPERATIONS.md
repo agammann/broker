@@ -27,18 +27,20 @@ The backup envelope includes wrapped DEK and cryptographic metadata, with the ac
 
 Tests exercise both failure-preserving and successful restore paths, including decrypting the restored account with the original passphrase. Independent storage, actual host disaster recovery and external session invalidation must be verified in the deployment environment.
 
-If you forget only the owner login, create a fresh isolated installation with a new owner login and restore a known encrypted backup using its vault passphrase. There is no hidden password-reset endpoint or default administrator. If you have no readable backup and cannot log in, recovery requires owner-controlled offline administration; there is no supported way to recover a forgotten vault passphrase. Do not ask an AI agent to inspect plaintext process memory.
+If you forget only the owner login, create a fresh isolated installation with a new owner login and restore a known encrypted backup using its vault passphrase. There is no hidden password-reset endpoint or default administrator. If you have no readable backup and cannot log in, recovery requires owner-controlled offline administration; there is no supported way to recover a forgotten vault passphrase. Do not use process-memory inspection as a passphrase recovery method.
 
 ## Upgrade and rollback
 
 1. Read release notes and check the target release's schema version and runtime requirements.
 2. Export and test an encrypted backup. Record the source commit/version. Save the previous application directory/image.
 3. Stop Broker gracefully. For a fast same-version rollback, also take an owner-only **cold** copy of the entire data directory/volume after shutdown. Do not copy only the main SQLite file while WAL writes are active.
-4. Install the locked dependencies in a new directory, build, run checks, then start against a copy of the data first. SQLite migrations use a transaction; binaries reject schema versions newer than they understand. This candidate has only migration 001.
+4. Install the locked dependencies in a new directory, build, run checks, then start against a copy of the data first. SQLite migrations use a transaction; binaries reject schema versions newer than they understand. Version 1.0.0 has only migration 001.
 5. Verify owner login, locked startup, unlock, fixture/actual adapter reads and revocation before replacing the live instance.
 6. Roll back by stopping the upgraded service and starting the previous binary against the cold pre-upgrade data copy. If schemas differ, never blindly point an old binary at upgraded data. A fresh install plus encrypted backup restore is the alternative, with re-verification and credential rotation required.
 
 A true cross-version upgrade/rollback cannot be claimed tested until a second schema version exists. The suite tests initial migration and same-version restart/restore. Do not delete old recovery material until the new installation has been verified.
+
+For the bundled portal, a Broker-only restart leaves the portal’s replay history intact. Before testing a restored account, allow a full authenticator period to pass (30 seconds for generated fixture users). An immediate attempt can return `incorrect_credentials` for an already consumed code; see [troubleshooting](TROUBLESHOOTING.md).
 
 ## Secret and account deletion
 
