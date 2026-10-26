@@ -29,7 +29,7 @@ COPY --from=build /app/package.json ./package.json
 USER node
 CMD ["node", "dist/server/gateway.js"]
 
-FROM caddy@sha256:5f5c8640aae01df9654968d946d8f1a56c497f1dd5c5cda4cf95ab7c14d58648 AS ingress
+FROM caddy@sha256:504a44d7d74bd2bc28a66afc4774912fc21223ca8a67734af1c54ab2f999b489 AS ingress
 # Ports 4310/4311 need no low-port capability. Remove the inherited file
 # capability so exec succeeds with cap_drop ALL and no-new-privileges.
 RUN setcap -r /usr/bin/caddy
