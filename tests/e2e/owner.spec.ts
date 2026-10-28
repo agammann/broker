@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { fixture, ownerPassword, passphrase } from "../helpers.js";
+import { ownerAccessDates } from "../owner-dates.js";
 test("fresh installation: private setup, dashboard, unlock, enroll, verify, grant, revoke and lock", async ({
   page,
 }, testInfo) => {
@@ -52,10 +53,11 @@ test("fresh installation: private setup, dashboard, unlock, enroll, verify, gran
   await page
     .getByRole("button", { name: "Agents & grants", exact: true })
     .click();
+  const accessDates = await page.evaluate(ownerAccessDates);
   await page.getByLabel("Agent name").fill("Fixture invoice reader");
   await page
     .getByLabel("Agent expires", { exact: true })
-    .fill("2027-01-01T00:00");
+    .fill(accessDates.agentExpires);
   await page
     .getByRole("button", { name: "Register agent", exact: true })
     .click();
@@ -73,8 +75,8 @@ test("fresh installation: private setup, dashboard, unlock, enroll, verify, gran
     startsLocally,
   );
   expect(minutesFromNow).toBeLessThan(2);
-  await page.getByLabel("Access starts").fill("2026-01-01T00:00");
-  await page.getByLabel("Access expires").fill("2026-12-31T00:00");
+  await page.getByLabel("Access starts").fill(accessDates.accessStarts);
+  await page.getByLabel("Access expires").fill(accessDates.accessExpires);
   await page.getByRole("button", { name: "Create grant", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Revoke grant" }),
