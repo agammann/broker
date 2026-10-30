@@ -168,7 +168,7 @@ export function Accounts({
                           onClick={() => {
                             if (
                               confirm(
-                                `Revoke all access to ${a.label}? Active tasks will stop.`,
+                                `Revoke all access to ${a.label}? Active tasks will stop and its grants will be revoked. Reconnecting the account will require new grants.`,
                               )
                             )
                               void run(
