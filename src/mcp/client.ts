@@ -3,7 +3,7 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 import { randomUUID } from "node:crypto";
 import { resolve } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
-const client = new Client({ name: "broker-example", version: "1.0.0" });
+const client = new Client({ name: "broker-example", version: "1.0.1" });
 const env = Object.fromEntries(
   Object.entries(process.env).filter(
     (v): v is [string, string] => v[1] !== undefined,

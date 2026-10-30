@@ -2,7 +2,7 @@
 
 [Repository overview](README.md) · [Documentation](docs/README.md)
 
-This guide describes how to build on Broker 1.0.0. The original source uses the [MIT license](LICENSE); the bundled portal provides synthetic data for development and verification.
+This guide describes how to build on Broker 1.0.1. The original source uses the [MIT license](LICENSE); the bundled portal provides synthetic data for development and verification.
 
 ## Prepare the checkout
 

@@ -16,7 +16,7 @@ if (
   !(u.protocol === "http:" && u.hostname === "127.0.0.1")
 )
   throw new Error("HTTPS required for remote gateway");
-const server = new McpServer({ name: "broker", version: "1.0.0" });
+const server = new McpServer({ name: "broker", version: "1.0.1" });
 for (const [name, schema] of Object.entries(toolSchemas))
   server.registerTool(
     name,
