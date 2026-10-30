@@ -24,7 +24,7 @@ Broker is a service you run yourself to give AI agents narrowly scoped account a
 1. **You define access.** Enroll an account privately, register an agent, and grant a specific operation with dates, expiration, and optional approval.
 2. **Broker enforces it.** The trusted service checks policy before authentication, before reads, and before returning results.
 3. **The agent gets the result.** The MCP interface returns invoice records. It does not export account passwords, authenticator secrets, or cookies.
-4. **You can stop access.** Revoke a grant, rotate an agent credential, or lock the vault. Information already returned cannot be recalled.
+4. **You can stop access.** Revoke a grant or an account, rotate an agent credential, or lock the vault. Revoking an account also revokes its grants; after reconnecting it, create grants deliberately. Replacing credentials on a connected account stops current work but preserves grants. A previously disabled account requires new grants when recovered, including after an interrupted replacement. Information already returned cannot be recalled.
 
 The application includes an owner dashboard, an encrypted SQLite vault, a separate agent gateway, six MCP tools, temporary Chromium sessions, activity history, and encrypted backup and restore.
 

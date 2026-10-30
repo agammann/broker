@@ -247,8 +247,12 @@ export class Broker {
     };
     const accountId = id ?? randomUUID();
     if (id) {
-      this.account(id);
-      await this.invalidate("account", id, "credentials_changed");
+      const previous = this.account(id);
+      await this.invalidate(
+        "account",
+        id,
+        previous.state === "disabled" ? "owner_revoked" : "credentials_changed",
+      );
     } else
       requireThat(
         this.db.all("SELECT id FROM accounts").length < 100,
@@ -268,10 +272,17 @@ export class Broker {
     return this.safeAccount(this.account(accountId));
   }
   async verifyAccount(id: string) {
-    const a = this.account(id);
+    let a = this.account(id);
     requireThat(this.vault.unlocked, "vault_locked", 423);
     requireThat(!this.jobs.has("verify:" + id), "busy");
     requireThat(this.jobs.size < 3, "busy");
+    if (a.state === "disabled") {
+      await this.invalidate("account", id);
+      a = this.account(id);
+      requireThat(!this.jobs.has("verify:" + id), "busy");
+      requireThat(this.jobs.size < 3, "busy");
+      requireThat(this.vault.unlocked, "vault_locked", 423);
+    }
     const adapter = this.adapters.get(a.adapter);
     requireThat(adapter, "adapter_unavailable");
     const controller = new AbortController(),
@@ -379,6 +390,12 @@ export class Broker {
       agent && !agent.revoked && agent.expires >= c.expires,
       "invalid_agent_expiration",
     );
+    if (!id)
+      id = this.db.get<Grant>(
+        "SELECT * FROM grants WHERE agent_id=? AND account_id=? AND revoked=1 ORDER BY version DESC,id LIMIT 1",
+        c.agent_id,
+        c.account_id,
+      )?.id;
     const other = this.db.get<Grant>(
       "SELECT * FROM grants WHERE agent_id=? AND account_id=? AND revoked=0 AND id!=?",
       c.agent_id,
@@ -392,6 +409,40 @@ export class Broker {
       requireThat(old, "not_found", 404);
       version = old.version + 1;
       await this.invalidate("grant", id, "policy_changed");
+      const currentAccount = this.account(c.account_id);
+      requireThat(
+        currentAccount.version === account.version &&
+          currentAccount.state === "connected" &&
+          currentAccount.adapter === c.adapter,
+        "account_not_connected",
+      );
+      const currentGrant = this.db.get<Grant>(
+        "SELECT * FROM grants WHERE id=?",
+        id,
+      );
+      requireThat(
+        currentGrant &&
+          currentGrant.version === version &&
+          currentGrant.revoked,
+        "access_revoked",
+      );
+      const currentAgent = this.db.get<Agent>(
+        "SELECT * FROM agents WHERE id=?",
+        c.agent_id,
+      );
+      requireThat(
+        currentAgent &&
+          !currentAgent.revoked &&
+          currentAgent.expires >= c.expires,
+        "invalid_agent_expiration",
+      );
+      const concurrent = this.db.get<Grant>(
+        "SELECT * FROM grants WHERE agent_id=? AND account_id=? AND revoked=0 AND id!=?",
+        c.agent_id,
+        c.account_id,
+        id,
+      );
+      requireThat(!concurrent, "grant_already_exists");
     } else
       requireThat(
         this.db.all("SELECT id FROM grants").length < 500,
@@ -778,10 +829,17 @@ export class Broker {
   ) {
     // Synchronous deny happens before awaiting browser cleanup.
     if (kind === "account")
-      this.db.run(
-        "UPDATE accounts SET state='disabled',version=version+1 WHERE id=?",
-        id,
-      );
+      this.db.tx(() => {
+        this.db.run(
+          "UPDATE accounts SET state='disabled',version=version+1 WHERE id=?",
+          id,
+        );
+        if (reason === "owner_revoked")
+          this.db.run(
+            "UPDATE grants SET revoked=1,version=version+1 WHERE account_id=?",
+            id,
+          );
+      });
     if (kind === "agent")
       this.db.run("UPDATE agents SET revoked=1 WHERE id=?", id);
     if (kind === "grant")
