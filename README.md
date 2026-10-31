@@ -6,7 +6,7 @@
 
 Broker is a service you run yourself to give AI agents narrowly scoped account access. You enroll credentials privately and choose the allowed operation. Broker checks permission, handles authentication and the browser session, and returns structured invoice records through MCP.
 
-**Version 1.0.0: a self-hosted developer starter.** Run the complete owner, vault, policy and MCP workflow against the bundled synthetic invoice portal, then build a separately verified adapter for your own integration. Only that bundled portal is implemented. The public website is a fictional browser simulation maintained separately; it does not host private vaults.
+**Version 1.0.1: a self-hosted developer starter.** Run the complete owner, vault, policy and MCP workflow against the bundled synthetic invoice portal, then build a separately verified adapter for your own integration. Only that bundled portal is implemented. The public website is a fictional browser simulation maintained separately; it does not host private vaults.
 
 ## Start here
 
@@ -30,12 +30,12 @@ The application includes an owner dashboard, an encrypted SQLite vault, a separa
 
 ## Get the source
 
-Download `broker_1.0.0_source.zip`, `release-manifest.json` and `SHA256SUMS` from [v1.0.0](https://github.com/agammann/broker/releases/tag/v1.0.0). Check the ZIP with `Get-FileHash -Algorithm SHA256` on Windows or `sha256sum` on Linux, compare the filename and hash with `SHA256SUMS`, and extract into a new directory. The manifest records the exact source commit, tree and container inputs. The extracted `broker-1.0.0` directory includes the frozen lockfile, MIT license, migrations and all installation guides.
+Download `broker_1.0.1_source.zip`, `release-manifest.json` and `SHA256SUMS` from [v1.0.1](https://github.com/agammann/broker/releases/tag/v1.0.1). Check the ZIP with `Get-FileHash -Algorithm SHA256` on Windows or `sha256sum` on Linux, compare the filename and hash with `SHA256SUMS`, and extract into a new directory. The manifest records the exact source commit, tree and container inputs. The extracted `broker-1.0.1` directory includes the frozen lockfile, MIT license, migrations and all installation guides.
 
 Developers can also clone the release:
 
 ```sh
-git clone --branch v1.0.0 https://github.com/agammann/broker.git
+git clone --branch v1.0.1 https://github.com/agammann/broker.git
 cd broker
 ```
 

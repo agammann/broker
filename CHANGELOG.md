@@ -1,5 +1,9 @@
 # Release notes
 
+## 1.0.1
+
+- Preserve owner account access decisions across recovery and grant changes, and clarify recovery in the dashboard.
+
 ## 1.0.0
 
 - Release the self-hosted owner dashboard, encrypted vault, policy-controlled gateway and six-tool stdio MCP workflow as a developer starter. The bundled synthetic invoice portal is the only implemented adapter; the public website remains a separate fictional sample.

@@ -1,2 +1,6 @@
 allowBuilds:
   esbuild: true
+overrides:
+  '@fastify/static>glob': 14.0.2
+  'glob>minimatch': 11.0.1
+  'minimatch@10': 11.0.1
