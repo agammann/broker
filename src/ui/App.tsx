@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { api, type Snapshot, when } from "./api.js";
 import { Auth } from "./Auth.js";
 import { Accounts, type Run } from "./Accounts.js";
@@ -62,38 +62,99 @@ export function App() {
     [error, setError] = useState(""),
     [notice, setNotice] = useState(""),
     [busy, setBusy] = useState(false);
-  const refreshAuth = useCallback(() => {
-    void api<{ initialized: boolean; authenticated: boolean }>("status")
-      .then(setAuth)
-      .catch((e) => setError(e.message));
+  const busyRef = useRef(false),
+    authenticatedRef = useRef(false),
+    refreshes = useRef(new Set<AbortController>()),
+    authRequest = useRef<AbortController | null>(null),
+    authRetry = useRef<ReturnType<typeof setTimeout> | null>(null),
+    authError = useRef<string | null>(null),
+    stateError = useRef<string | null>(null);
+  const refreshAuth = useCallback(async function requestAuth() {
+    if (authRetry.current) clearTimeout(authRetry.current);
+    authRetry.current = null;
+    authRequest.current?.abort();
+    const controller = new AbortController();
+    authRequest.current = controller;
+    try {
+      const next = await api<{ initialized: boolean; authenticated: boolean }>(
+        "status",
+        undefined,
+        controller.signal,
+      );
+      if (controller.signal.aborted) return false;
+      authenticatedRef.current = next.authenticated;
+      setAuth(next);
+      if (authError.current !== null) {
+        const previous = authError.current;
+        setError((current) => (current === previous ? "" : current));
+        authError.current = null;
+      }
+      return true;
+    } catch (e) {
+      if (controller.signal.aborted) return false;
+      authenticatedRef.current = false;
+      setAuth(undefined);
+      authError.current = (e as Error).message;
+      setError(authError.current);
+      authRetry.current = setTimeout(() => void requestAuth(), 5000);
+      return false;
+    } finally {
+      if (authRequest.current === controller) authRequest.current = null;
+    }
   }, []);
   const refresh = useCallback(async () => {
+    const controller = new AbortController();
+    refreshes.current.add(controller);
     try {
-      setState(await api<Snapshot>("state"));
+      const next = await api<Snapshot>("state", undefined, controller.signal);
+      if (!controller.signal.aborted) {
+        authenticatedRef.current = true;
+        setState(next);
+        if (stateError.current !== null) {
+          const previous = stateError.current;
+          setError((current) => (current === previous ? "" : current));
+          stateError.current = null;
+        }
+      }
     } catch (e) {
-      setError((e as Error).message);
-      refreshAuth();
+      if (!controller.signal.aborted) {
+        stateError.current = (e as Error).message;
+        setError(stateError.current);
+        void refreshAuth();
+      }
+    } finally {
+      refreshes.current.delete(controller);
     }
   }, [refreshAuth]);
   useEffect(() => {
-    refreshAuth();
+    void refreshAuth();
+    return () => {
+      authRequest.current?.abort();
+      if (authRetry.current) clearTimeout(authRetry.current);
+    };
   }, [refreshAuth]);
   useEffect(() => {
     if (!auth?.authenticated) {
       setState(undefined);
       setPage("Overview");
-      setError("");
+      if (auth) setError("");
       setNotice("");
       return;
     }
     void refresh();
     const t = setInterval(() => {
-      void refresh();
+      if (!busyRef.current && authenticatedRef.current) void refresh();
     }, 5000);
-    return () => clearInterval(t);
+    return () => {
+      clearInterval(t);
+      for (const controller of refreshes.current) controller.abort();
+    };
   }, [auth?.authenticated, refresh]);
   const run: Run = async (fn, success, refreshState = true) => {
-    if (busy) return;
+    if (busyRef.current) return;
+    busyRef.current = true;
+    authRequest.current?.abort();
+    for (const controller of refreshes.current) controller.abort();
     setBusy(true);
     setError("");
     setNotice("");
@@ -104,6 +165,7 @@ export function App() {
     } catch (e) {
       setError((e as Error).message);
     } finally {
+      busyRef.current = false;
       setBusy(false);
     }
   };
@@ -173,7 +235,7 @@ export function App() {
               void run(
                 async () => {
                   await api("logout", {});
-                  refreshAuth();
+                  if (!(await refreshAuth())) return false;
                 },
                 "Signed out.",
                 false,
