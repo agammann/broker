@@ -6,7 +6,7 @@ Choose Windows native for development or Docker Compose for container separation
 
 ## Before you start
 
-Install Node **24.19.0 or newer within 24.x** and pnpm **11.19.0**. Check `node --version` and `pnpm --version`. If pnpm is missing, install the pinned version with `npm install --global pnpm@11.19.0`. Download and verify the [v1.0.1 source ZIP](https://github.com/agammann/broker/releases/tag/v1.0.1) as described in the [repository overview](../README.md#get-the-source), then open the extracted `broker-1.0.1` directory. Git is only needed for the alternative checkout or developer packaging commands:
+The published v1.0.1 archive requires Node **24.19.0 or newer within 24.x**. This checkout requires Node **26.13.1 or newer within 26.x**. Both use pnpm **11.19.0**. Check `node --version` and `pnpm --version`. If pnpm is missing, install the pinned version with `npm install --global pnpm@11.19.0`. Download and verify the [v1.0.1 source ZIP](https://github.com/agammann/broker/releases/tag/v1.0.1) as described in the [repository overview](../README.md#get-the-source), then open the extracted `broker-1.0.1` directory. Git is only needed for the alternative checkout or developer packaging commands:
 
 ```powershell
 git clone --branch v1.0.1 https://github.com/agammann/broker.git
@@ -17,7 +17,7 @@ Run all commands from this repository directory, including commands in additiona
 
 ## Windows first run
 
-Requirements: supported Node 24 LTS, pnpm 11.19.0, about 2 GB free disk space, and at least 2 GB available RAM for Chromium and scrypt. Host time must be synchronized using the OS time service. Never share this OS account with an untrusted agent.
+Requirements: the Node version specified above, pnpm 11.19.0, about 2 GB free disk space, and at least 2 GB available RAM for Chromium and scrypt. Host time must be synchronized using the OS time service. Never share this OS account with an untrusted agent.
 
 ### 1. Install and initialize
 
@@ -98,7 +98,7 @@ To stop, press Ctrl+C in all three terminals and allow up to 75 seconds for clea
 
 ## Linux native
 
-Use Node 24 LTS and the same pnpm commands. Install browser system dependencies with `pnpm exec playwright install --with-deps chromium`. Run as a dedicated unprivileged OS user with working Chromium sandbox support. Run `chmod 700 .secrets data` and `chmod 600 .secrets/*`. Linux native runtime is not claimed verified until it appears as passed in the platform matrix.
+Use the Node version specified above and the same pnpm commands. Install browser system dependencies with `pnpm exec playwright install --with-deps chromium`. Run as a dedicated unprivileged OS user with working Chromium sandbox support. Run `chmod 700 .secrets data` and `chmod 600 .secrets/*`. Linux native runtime is not claimed verified until it appears as passed in the platform matrix.
 
 ## Docker Compose
 
