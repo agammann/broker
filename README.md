@@ -39,7 +39,7 @@ git clone --branch v1.0.1 https://github.com/agammann/broker.git
 cd broker
 ```
 
-For native Windows, use Node **24.19.0 or newer within 24.x** and pnpm **11.19.0**. Continue with the [installation guide](docs/INSTALL.md), which covers private initialization, filesystem permissions, service startup, and expected results. No AI API key is needed for the bundled workflow.
+For the published v1.0.1 archive on native Windows, use Node **24.19.0 or newer within 24.x** and pnpm **11.19.0**. This checkout also supports Node **26.13.1 or newer within 26.x**. Continue with the [installation guide](docs/INSTALL.md), which covers private initialization, filesystem permissions, service startup, and expected results. No AI API key is needed for the bundled workflow.
 
 A default installation has an empty, locked vault and no enabled adapter. That is expected. Use the opt-in test portal instructions to retrieve synthetic invoices.
 

@@ -160,7 +160,7 @@ const publish = async ({ github, context, core }) => {
   const notes = changelog.split(heading)[1].split("\n## ")[0].trim();
   const body =
     notes +
-    "\n\nDownload the source ZIP, manifest and SHA256SUMS. Verify the checksums before extracting into a new directory. Node.js 24.19.0 or newer within 24.x and pnpm 11.19.0 are required for the native owner service. Docker uses the pinned Linux images in the manifest. The source includes the MIT license, frozen lockfile and migration 001. This v1 is a self-hosted developer starter with only the bundled synthetic invoice portal adapter; the visitor website is a separate fictional simulation. No LLM or provider API key is needed.\n\n" +
+    "\n\nDownload the source ZIP, manifest and SHA256SUMS. Verify the checksums before extracting into a new directory. Node.js 24.19.0 or newer within 24.x or Node.js 26.13.1 or newer within 26.x, and pnpm 11.19.0, are required for the native owner service. Docker uses the pinned Linux images in the manifest. The source includes the MIT license, frozen lockfile and migration 001. This v1 is a self-hosted developer starter with only the bundled synthetic invoice portal adapter; the visitor website is a separate fictional simulation. No LLM or provider API key is needed.\n\n" +
     "[Installation, upgrade and recovery](https://github.com/" +
     owner +
     "/" +

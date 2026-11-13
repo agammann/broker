@@ -15,6 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest, ubuntu-22.04]
+        node: ["24.19.0", "26.13.1"]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     steps:
@@ -23,7 +24,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: "24.19.0"
+          node-version: ${{ matrix.node }}
       - run: npm install --global pnpm@11.19.0
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
@@ -35,7 +36,7 @@ jobs:
       - run: pnpm package:release
       - run: pnpm test:consumer
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: matrix.os == 'ubuntu-22.04'
+        if: matrix.os == 'ubuntu-22.04' && matrix.node == '26.13.1'
         with:
           name: broker-release
           path: release-artifacts/
@@ -43,8 +44,58 @@ jobs:
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
-          name: broker-browser-${{ matrix.os }}
+          name: broker-browser-${{ matrix.os }}-${{ matrix.node }}
           path: test-results/
+  node24-types:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24.19.0"
+      - run: npm install --global pnpm@11.19.0
+      - run: pnpm install --frozen-lockfile
+      - name: Verify both Node declaration sets
+        shell: bash
+        run: |
+          printf 'import "node:ffi";\n' > "$RUNNER_TEMP/node26-only.ts"
+          tsc_args=(--ignoreConfig --noEmit --skipLibCheck --module NodeNext --moduleResolution NodeNext --target ES2023 --types node --typeRoots "$GITHUB_WORKSPACE/node_modules/@types" "$RUNNER_TEMP/node26-only.ts")
+          pnpm exec tsc "${tsc_args[@]}"
+          pnpm add --save-dev --save-exact @types/node@24.19.2
+          node -e 'if (require("./node_modules/@types/node/package.json").version !== "24.19.2") process.exit(1)'
+          if pnpm exec tsc "${tsc_args[@]}" > "$RUNNER_TEMP/node24-type-probe.log" 2>&1; then
+            echo 'Node 24 declarations unexpectedly accepted node:ffi'
+            exit 1
+          fi
+          grep -F 'TS2882' "$RUNNER_TEMP/node24-type-probe.log"
+          grep -F 'node:ffi' "$RUNNER_TEMP/node24-type-probe.log"
+          pnpm typecheck
+          pnpm build
+  node-upgrade:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "26.13.1"
+      - run: npm install --global pnpm@11.19.0
+      - run: pnpm install --frozen-lockfile && pnpm build
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24.19.0"
+      - name: Create synthetic Node 24 vault and encrypted backup
+        run: node scripts/test-node-upgrade.mjs seed "$RUNNER_TEMP/broker-node-upgrade-${{ github.run_id }}-${{ github.run_attempt }}"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "26.13.1"
+      - name: Open the vault and restore its backup on Node 26
+        run: node scripts/test-node-upgrade.mjs verify "$RUNNER_TEMP/broker-node-upgrade-${{ github.run_id }}-${{ github.run_attempt }}"
   compose:
     runs-on: ubuntu-22.04
     timeout-minutes: 30
@@ -54,7 +105,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: "24.19.0"
+          node-version: "26.13.1"
       - run: npm install --global pnpm@11.19.0
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
@@ -123,7 +174,7 @@ jobs:
         if: always() && steps.missing.outcome != 'failure'
         run: exit 1
   publish:
-    needs: [verify, compose, artifact-transfer, artifact-missing-guard]
+    needs: [verify, node24-types, node-upgrade, compose, artifact-transfer, artifact-missing-guard]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-22.04
     timeout-minutes: 10

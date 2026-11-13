@@ -6,7 +6,7 @@ This guide describes how to build on Broker 1.0.1. The original source uses the 
 
 ## Prepare the checkout
 
-Use Node 24.19.0 or newer within 24.x and pnpm 11.19.0. From the repository root:
+For this checkout, use Node 24.19.0 or newer within 24.x, or Node 26.13.1 or newer within 26.x, and pnpm 11.19.0. The published v1.0.1 source archive requires Node 24.19.0 or newer within 24.x. From the repository root:
 
 ```sh
 pnpm install --frozen-lockfile
