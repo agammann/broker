@@ -66,7 +66,9 @@ export function App() {
     authenticatedRef = useRef(false),
     refreshes = useRef(new Set<AbortController>()),
     authRequest = useRef<AbortController | null>(null),
-    authRetry = useRef<ReturnType<typeof setTimeout> | null>(null);
+    authRetry = useRef<ReturnType<typeof setTimeout> | null>(null),
+    authError = useRef<string | null>(null),
+    stateError = useRef<string | null>(null);
   const refreshAuth = useCallback(async function requestAuth() {
     if (authRetry.current) clearTimeout(authRetry.current);
     authRetry.current = null;
@@ -82,13 +84,18 @@ export function App() {
       if (controller.signal.aborted) return false;
       authenticatedRef.current = next.authenticated;
       setAuth(next);
-      setError("");
+      if (authError.current !== null) {
+        const previous = authError.current;
+        setError((current) => (current === previous ? "" : current));
+        authError.current = null;
+      }
       return true;
     } catch (e) {
       if (controller.signal.aborted) return false;
       authenticatedRef.current = false;
       setAuth(undefined);
-      setError((e as Error).message);
+      authError.current = (e as Error).message;
+      setError(authError.current);
       authRetry.current = setTimeout(() => void requestAuth(), 5000);
       return false;
     } finally {
@@ -103,10 +110,16 @@ export function App() {
       if (!controller.signal.aborted) {
         authenticatedRef.current = true;
         setState(next);
+        if (stateError.current !== null) {
+          const previous = stateError.current;
+          setError((current) => (current === previous ? "" : current));
+          stateError.current = null;
+        }
       }
     } catch (e) {
       if (!controller.signal.aborted) {
-        setError((e as Error).message);
+        stateError.current = (e as Error).message;
+        setError(stateError.current);
         void refreshAuth();
       }
     } finally {

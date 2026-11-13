@@ -214,6 +214,31 @@ test("fresh installation: private setup, dashboard, unlock, enroll, verify, gran
     { timeout: 10000 },
   );
   expect(resumedPoll.status()).toBe(200);
+  const failedPoll = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname === "/api/state" &&
+      response.status() === 503,
+    { timeout: 10000 },
+  );
+  const authenticatedStatus = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname === "/api/status" &&
+      response.status() === 200,
+    { timeout: 10000 },
+  );
+  failState = true;
+  await failedPoll;
+  await authenticatedStatus;
+  await expect(page.getByRole("alert")).toHaveText(/fixture unavailable/);
+  const recoveredPoll = await page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname === "/api/state" &&
+      response.status() === 200,
+    { timeout: 10000 },
+  );
+  expect(recoveredPoll.status()).toBe(200);
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  expect(injectedFailures).toBe(4);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole("button", { name: "Overview", exact: true }).click();
   await expect(
