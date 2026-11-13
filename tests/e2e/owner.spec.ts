@@ -5,9 +5,16 @@ test("fresh installation: private setup, dashboard, unlock, enroll, verify, gran
   page,
 }, testInfo) => {
   const errors: string[] = [];
+  let injectedFailures = 0;
+  let expectedFailures = 0;
   page.on("pageerror", (e) => errors.push(e.message));
   page.on("console", (message) => {
-    if (message.type() === "error") errors.push(message.text());
+    if (message.type() === "error") {
+      if (expectedFailures && message.text().includes("status of 503")) {
+        expectedFailures--;
+        injectedFailures++;
+      } else errors.push(message.text());
+    }
   });
   await page.goto("/");
   await expect(
@@ -116,19 +123,97 @@ test("fresh installation: private setup, dashboard, unlock, enroll, verify, gran
   await expect(
     page.getByRole("heading", { name: "Vault & maintenance", exact: true }),
   ).toBeVisible();
+  let capturedStatus!: () => void;
+  let releaseOldStatus!: () => void;
+  let oldStatusFinished!: () => void;
+  let firstStatusFailure!: () => void;
+  const oldStatusCaptured = new Promise<void>((resolve) => {
+    capturedStatus = resolve;
+  });
+  const releaseOld = new Promise<void>((resolve) => {
+    releaseOldStatus = resolve;
+  });
+  const oldFinished = new Promise<void>((resolve) => {
+    oldStatusFinished = resolve;
+  });
+  const statusFailed = new Promise<void>((resolve) => {
+    firstStatusFailure = resolve;
+  });
+  let failState = true;
+  let holdOldStatus = true;
+  let statusFailuresRemaining = 2;
+  await page.route("**/api/state", async (route) => {
+    if (!failState) return route.continue();
+    failState = false;
+    expectedFailures++;
+    await route.fulfill({ status: 503, json: { code: "fixture_unavailable" } });
+  });
+  await page.route("**/api/status", async (route) => {
+    if (holdOldStatus) {
+      holdOldStatus = false;
+      const response = await route.fetch();
+      capturedStatus();
+      await releaseOld;
+      try {
+        await route.fulfill({ response });
+      } catch {
+        /* The old request was aborted. */
+      }
+      oldStatusFinished();
+    } else if (statusFailuresRemaining > 0) {
+      statusFailuresRemaining--;
+      expectedFailures++;
+      await route.fulfill({
+        status: 503,
+        json: { code: "fixture_unavailable" },
+      });
+      firstStatusFailure();
+    } else await route.continue();
+  });
+  await oldStatusCaptured;
+  let restoring = false;
+  let pollsDuringRestore = 0;
+  page.on("response", (response) => {
+    if (restoring && new URL(response.url()).pathname === "/api/state")
+      pollsDuringRestore++;
+  });
+  // The server revokes the old session before its response reaches the UI.
+  // Keep that response in flight for longer than the five-second poll interval.
+  await page.route("**/api/vault/restore", async (route) => {
+    const response = await route.fetch();
+    restoring = true;
+    await new Promise((resolve) => setTimeout(resolve, 6500));
+    await route.fulfill({ response });
+    restoring = false;
+  });
   page.once("dialog", (dialog) => dialog.accept());
   await page
     .getByRole("button", { name: "Restore backup", exact: true })
     .click();
+  await statusFailed;
+  await expect(page.getByRole("status")).toHaveText("fixture unavailable");
+  await expect(page.getByRole("heading", { name: "Overview" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Welcome back" })).toBeVisible(
+    { timeout: 25000 },
+  );
+  releaseOldStatus();
+  await oldFinished;
   await expect(
     page.getByRole("heading", { name: "Welcome back" }),
   ).toBeVisible();
+  expect(pollsDuringRestore).toBe(0);
+  expect(injectedFailures).toBe(3);
   await page.getByLabel("Owner password", { exact: true }).fill(ownerPassword);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Overview", exact: true }),
   ).toBeVisible();
   await expect(page.getByRole("alert")).toHaveCount(0);
+  const resumedPoll = await page.waitForResponse(
+    (response) => new URL(response.url()).pathname === "/api/state",
+    { timeout: 10000 },
+  );
+  expect(resumedPoll.status()).toBe(200);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole("button", { name: "Overview", exact: true }).click();
   await expect(

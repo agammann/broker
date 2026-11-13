@@ -10,7 +10,7 @@ export function Maintenance({
   state: Snapshot;
   run: Run;
   busy: boolean;
-  refreshAuth: () => void;
+  refreshAuth: () => Promise<boolean>;
 }) {
   return (
     <>
@@ -167,7 +167,7 @@ export function Maintenance({
                     confirmation: text(d, "confirmation"),
                   });
                   f.reset();
-                  refreshAuth();
+                  if (!(await refreshAuth())) return false;
                 },
                 "Backup restored. Sign in again.",
                 false,
