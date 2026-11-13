@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "24.19.0"
       - run: npm install --global pnpm@11.19.0
@@ -29,7 +29,7 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm check
       - run: pnpm audit --audit-level=low
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
       - run: pnpm package:release
@@ -52,7 +52,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "24.19.0"
       - run: npm install --global pnpm@11.19.0
@@ -69,8 +69,61 @@ jobs:
       - name: Remove this disposable CI stack
         if: always()
         run: docker compose -p broker-verification -f compose.yaml -f compose.fixture.yaml down --volumes --remove-orphans
+  artifact-transfer:
+    needs: verify
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Download source artifact (first attempt)
+        id: download1
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: broker-release
+          path: release-artifacts
+      - name: Wait before second attempt
+        if: steps.download1.outcome == 'failure'
+        run: sleep 10
+      - name: Download source artifact (second attempt)
+        id: download2
+        if: steps.download1.outcome == 'failure'
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: broker-release
+          path: release-artifacts
+      - name: Wait before final attempt
+        if: steps.download2.outcome == 'failure'
+        run: sleep 20
+      - name: Download source artifact (final attempt)
+        if: steps.download2.outcome == 'failure'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: broker-release
+          path: release-artifacts
+      - name: Verify and unpack the exact source
+        run: python scripts/unpack-release.py "$RUNNER_TEMP/broker-transfer-${{ github.run_id }}"
+  artifact-missing-guard:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - name: Probe a nonexistent artifact
+        id: missing
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: broker-nonexistent-transfer-guard
+      - name: Reject an unexpected missing-artifact result
+        if: always() && steps.missing.outcome != 'failure'
+        run: exit 1
   publish:
-    needs: [verify, compose]
+    needs: [verify, compose, artifact-transfer, artifact-missing-guard]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-22.04
     timeout-minutes: 10
@@ -81,7 +134,30 @@ jobs:
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      - name: Download source artifact (first attempt)
+        id: download1
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: broker-release
+          path: release-artifacts
+      - name: Wait before second attempt
+        if: steps.download1.outcome == 'failure'
+        run: sleep 10
+      - name: Download source artifact (second attempt)
+        id: download2
+        if: steps.download1.outcome == 'failure'
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: broker-release
+          path: release-artifacts
+      - name: Wait before final attempt
+        if: steps.download2.outcome == 'failure'
+        run: sleep 20
+      - name: Download source artifact (final attempt)
+        if: steps.download2.outcome == 'failure'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: broker-release
           path: release-artifacts
