@@ -38,7 +38,7 @@ If you forget only the owner login, create a fresh isolated installation with a 
 5. Verify owner login, locked startup, unlock, fixture/actual adapter reads and revocation before replacing the live instance.
 6. Roll back by stopping the upgraded service and starting the previous binary against the cold pre-upgrade data copy. If schemas differ, never blindly point an old binary at upgraded data. A fresh install plus encrypted backup restore is the alternative, with re-verification and credential rotation required.
 
-A true cross-version upgrade/rollback cannot be claimed tested until a second schema version exists. The suite tests initial migration and same-version restart/restore. Do not delete old recovery material until the new installation has been verified.
+Cross-schema migration and downgrade are not claimed tested: migration 001 is the only schema. The suite tests initial migration and same-version restart/restore; CI separately verifies that a vault and encrypted backup created on Node 24 can be opened and restored on Node 26. Do not delete old recovery material until the new installation has been verified.
 
 For the bundled portal, a Broker-only restart leaves the portal’s replay history intact. Before testing a restored account, allow a full authenticator period to pass (30 seconds for generated fixture users). An immediate attempt can return `incorrect_credentials` for an already consumed code; see [troubleshooting](TROUBLESHOOTING.md).
 

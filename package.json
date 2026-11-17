@@ -1,6 +1,6 @@
 {
   "name": "broker",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "type": "module",
   "engines": {
@@ -51,7 +51,7 @@
     "tsx": "4.23.15",
     "typescript": "6.0.3",
     "typescript-eslint": "8.71.1",
-    "vite": "8.3.3",
+    "vite": "8.3.7",
     "vitest": "4.1.12"
   },
   "license": "MIT"
