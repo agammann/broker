@@ -1,5 +1,11 @@
 # Release notes
 
+## 1.0.2
+
+- Deliver the previously unreleased Node 26 support, Node 24 declaration and vault/backup compatibility checks, request-state UI recovery and polling/rate-limit regressions. Node 24.19+ within 24.x remains supported; Node 26 requires 26.13.1+ within 26.x. Migration 001, vault and backup formats, and the six-tool interface are unchanged.
+- Patch Vite 8.3.3 to 8.3.7 with patched Rolldown. The upstream advisory concerns explicitly network-exposed development servers; Broker’s development configuration binds loopback and production serves built assets. No production exploitation is claimed.
+- Align source downloads and MCP metadata with this delivery and clarify consumer tool paths and the distinction between Node-runtime compatibility and unverified cross-schema migration.
+
 ## 1.0.1
 
 - Preserve owner account access decisions across recovery and grant changes, and clarify recovery in the dashboard.

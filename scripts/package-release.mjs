@@ -67,7 +67,7 @@ const manifest = {
   },
   schemaVersion: 1,
   delivery:
-    "Self-hosted developer starter; only bundled synthetic invoice portal implemented. No vault, credentials, backups, dependency cache or generated build in the source ZIP.",
+    "Self-hosted account-access service; only bundled synthetic invoice portal implemented. No vault, credentials, backups, dependency cache or generated build in the source ZIP.",
 };
 const manifestBytes = Buffer.from(JSON.stringify(manifest, null, 2) + "\n");
 writeFileSync(resolve(directory, "release-manifest.json"), manifestBytes);
