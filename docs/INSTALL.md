@@ -6,10 +6,10 @@ Choose Windows native for development or Docker Compose for container separation
 
 ## Before you start
 
-The published v1.0.1 archive requires Node **24.19.0 or newer within 24.x**. This checkout also supports Node **26.13.1 or newer within 26.x**. Both use pnpm **11.19.0**. Check `node --version` and `pnpm --version`. If pnpm is missing, install the pinned version with `npm install --global pnpm@11.19.0`. Download and verify the [v1.0.1 source ZIP](https://github.com/agammann/broker/releases/tag/v1.0.1) as described in the [repository overview](../README.md#get-the-source), then open the extracted `broker-1.0.1` directory. Git is only needed for the alternative checkout or developer packaging commands:
+The published v1.0.2 archive and this checkout require Node **24.19.0 or newer within 24.x**, or Node **26.13.1 or newer within 26.x**, and pnpm **11.19.0**. The older v1.0.1 archive requires Node 24.19.0 or newer within 24.x. Check `node --version` and `pnpm --version`. If pnpm is missing, install the pinned version with `npm install --global pnpm@11.19.0`. Download and verify the [v1.0.2 source ZIP](https://github.com/agammann/broker/releases/tag/v1.0.2) as described in the [repository overview](../README.md#get-the-source), then open the extracted `broker-1.0.2` directory. Git is only needed for the alternative checkout or developer packaging commands:
 
 ```powershell
-git clone --branch v1.0.1 https://github.com/agammann/broker.git
+git clone --branch v1.0.2 https://github.com/agammann/broker.git
 cd broker
 ```
 

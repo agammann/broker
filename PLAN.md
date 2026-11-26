@@ -2,7 +2,7 @@
 
 ## Current delivery scope
 
-Version 1.0.0 is bounded to the self-hosted developer starter: owner dashboard, encrypted vault, policy-controlled MCP access, bundled synthetic invoice portal, setup and recovery instructions, and checked source delivery. The public sample website is maintained separately. The unchecked items below describe future integration work, not compatibility provided by v1.
+Version 1.0.2 is bounded to the self-hosted account-access service: owner dashboard, encrypted vault, policy-controlled MCP access, bundled synthetic invoice portal, setup and recovery instructions, and checked source delivery. The public sample website is maintained separately. The unchecked items below describe future integration work, not compatibility provided by v1.
 
 - [x] Inspect workspace, instructions, runtime, official documentation and package registry.
 - [x] Establish dashboard visual direction and service boundaries.

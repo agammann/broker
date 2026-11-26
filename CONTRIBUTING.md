@@ -2,7 +2,7 @@
 
 [Repository overview](README.md) · [Documentation](docs/README.md)
 
-This guide describes how to build on Broker 1.0.1. The original source uses the [MIT license](LICENSE); the bundled portal provides synthetic data for development and verification.
+This guide describes how to build on Broker 1.0.2. The original source uses the [MIT license](LICENSE); the bundled portal provides synthetic data for development and verification.
 
 ## Prepare the checkout
 
@@ -45,7 +45,7 @@ pnpm package:release
 pnpm test:consumer
 ```
 
-Packaging requires a clean committed checkout. It creates `release-artifacts/` with the exact versioned source ZIP, manifest and SHA256SUMS. The consumer check rejects checksum or source-tree differences and requires a new extraction directory; it installs the frozen dependencies and runs the actual MCP/Chromium and owner browser checks from that extraction. It creates only disposable fixture state. Set `BROKER_PYTHON` or `BROKER_PNPM` to the corresponding executable/script path when those tools are outside PATH. CI publishes only an exact current main commit after the Windows, Linux, fresh-consumer and Compose jobs pass; an existing published version is left unchanged.
+Packaging requires a clean committed checkout. It creates `release-artifacts/` with the exact versioned source ZIP, manifest and SHA256SUMS. The consumer check rejects checksum or source-tree differences and requires a new extraction directory; it installs the frozen dependencies and runs the actual MCP/Chromium and owner browser checks from that extraction. It creates only disposable fixture state. Set `BROKER_PYTHON` to the Python executable and `BROKER_PNPM` to pnpm’s JavaScript entrypoint when those tools are outside PATH; the consumer invokes the latter with Node. CI publishes only an exact current main commit after the Windows, Linux, fresh-consumer and Compose jobs pass; an existing published version is left unchanged.
 
 [GitHub Actions](https://github.com/agammann/broker/actions/workflows/check.yml) runs `pnpm check` on Windows and Linux, audits all locked dependencies, and builds a fresh `broker-verification` Compose project to run the encrypted backup/restore and actual MCP/browser workflow. That job deletes only its disposable CI stack and volume after verification. Browser screenshots use fictional fixture state and are saved as CI artifacts; secrets and backups are excluded.
 
